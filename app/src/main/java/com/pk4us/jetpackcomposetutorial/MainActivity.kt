@@ -1,43 +1,376 @@
 package com.pk4us.jetpackcomposetutorial
 
 import android.os.Bundle
+import android.view.MotionEvent
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.animation.*
+import androidx.compose.animation.core.*
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.*
+import androidx.compose.material.MaterialTheme.colors
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInteropFilter
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
-import com.pk4us.jetpackcomposetutorial.ui.theme.JetpackComposeTutorialTheme
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            JetpackComposeTutorialTheme {
-                // A surface container using the 'background' color from the theme
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colors.background
-                ) {
-                    Greeting("Android")
-                }
-            }
+
         }
     }
 }
 
+
+@Preview
 @Composable
-fun Greeting(name: String) {
-    Text(text = "Hello $name!")
+fun InfiniteAnimation() {
+    val infiniteTransition = rememberInfiniteTransition()
+
+    val heartSize by infiniteTransition.animateFloat(
+        initialValue = 350.0f,
+        targetValue = 450.0f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(800, delayMillis = 1000, easing = FastOutLinearInEasing),
+            repeatMode = RepeatMode.Reverse
+        )
+    )
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.DarkGray),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Image(
+            painter = painterResource(R.drawable.heart),
+
+            contentDescription = "heart",
+            modifier = Modifier
+                .size(heartSize.dp)
+        )
+    }
 }
 
-@Preview(showBackground = true)
+
+@Preview
 @Composable
-fun DefaultPreview() {
-    JetpackComposeTutorialTheme {
-        Greeting("Android")
+private fun AnimateDpAsState() {
+    val isNeedExpansion = rememberSaveable { mutableStateOf(false) }
+    val animatedHeightDp: Dp by animateDpAsState(targetValue = if (isNeedExpansion.value) 350.dp else 100.dp)
+    Column(
+        modifier = Modifier
+            .background(color = Color.DarkGray)
+            .fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        CircleImage(animatedHeightDp)
+        Button(
+            onClick = { isNeedExpansion.value = !isNeedExpansion.value },
+            modifier = Modifier
+                .padding(top = 50.dp)
+                .width(300.dp),
+            colors = ButtonDefaults.buttonColors(backgroundColor = Color.Black)
+        ) {
+            Text(("animateDpAsState"), color = Color.White)
+        }
     }
+}
+
+
+@Preview
+@Composable
+private fun AnimateColorAsState() {
+    var isNeedColorChange by remember { mutableStateOf(false) }
+    val startColor = Color.Blue
+    val endColor = Color.Green
+    val backgroundColor by animateColorAsState(
+        if (isNeedColorChange) endColor else startColor,
+        animationSpec = tween(
+            durationMillis = 2000,
+            delayMillis = 100,
+            easing = LinearEasing
+        )
+    )
+    Column(
+        modifier = Modifier
+            .padding(10.dp)
+            .fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxHeight(0.8f)
+                .background(backgroundColor)
+        )
+        Button(
+            onClick = { isNeedColorChange = !isNeedColorChange },
+            modifier = Modifier.padding(top = 10.dp)
+        ) {
+            Text(text = "Switch Color")
+        }
+    }
+}
+
+@Preview
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+fun ButtonScaleAnimation() {
+    val selected = remember { mutableStateOf(false) }
+    val scale = animateFloatAsState(if (selected.value) 2f else 1f)
+
+    Column(
+        Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Button(
+            onClick = { },
+            modifier = Modifier
+                .scale(scale.value)
+                .height(40.dp)
+                .width(200.dp)
+                .pointerInteropFilter {
+                    when (it.action) {
+                        MotionEvent.ACTION_DOWN -> {
+                            selected.value = true
+                        }
+
+                        MotionEvent.ACTION_UP -> {
+                            selected.value = false
+                        }
+                    }
+                    true
+                }
+        ) {
+            Text(text = "Scale Animation", fontSize = 15.sp, color = Color.White)
+        }
+    }
+}
+
+
+@Preview
+@Composable
+private fun AnimatableSample() {
+    var isAnimated by remember { mutableStateOf(false) }
+
+    // Start with gray color and animate to green/red based on `button click`
+    val color = remember { Animatable(Color.DarkGray) }
+    LaunchedEffect(isAnimated) {
+        color.animateTo(if (isAnimated) Color.Green else Color.Red, animationSpec = tween(2000))
+    }
+    Column(
+        modifier = Modifier
+            .padding(10.dp)
+            .fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Box(
+            Modifier
+                .fillMaxWidth()
+                .fillMaxHeight(0.8f)
+                .background(color.value)
+        )
+        Button(
+            onClick = { isAnimated = !isAnimated },
+            modifier = Modifier.padding(top = 10.dp)
+        ) {
+            Text(text = "Animate Color")
+        }
+    }
+}
+
+
+@Preview
+@Composable
+private fun TransitionAnimation() {
+    var isAnimated by remember { mutableStateOf(false) }
+    val transition = updateTransition(targetState = isAnimated, label = "transition")
+
+    val rocketOffset by transition.animateOffset(transitionSpec = {
+        if (this.targetState) {
+            tween(1000) // launch duration
+
+        } else {
+            tween(1500) // land duration
+        }
+    }, label = "rocket offset") { animated ->
+        if (animated) Offset(200f, 0f) else Offset(200f, 500f)
+    }
+
+    val rocketSize by transition.animateDp(transitionSpec = {
+        tween(1000)
+    }, "") { animated ->
+        if (animated) 75.dp else 150.dp
+    }
+
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(color = Color.DarkGray)
+    ) {
+        Image(
+            painter = painterResource(id = R.drawable.rocket),
+            contentDescription = "Rocket",
+            modifier = Modifier
+                .size(rocketSize)
+                .alpha(1.0f)
+                .offset(rocketOffset.x.dp, rocketOffset.y.dp)
+        )
+        Button(
+            onClick = { isAnimated = !isAnimated },
+            modifier = Modifier.padding(top = 10.dp)
+        ) {
+            Text(text = if (isAnimated) "Land rocket" else "Launch rocket")
+        }
+    }
+}
+
+
+@Preview
+@Composable
+private fun AnimateAsFloatContent() {
+    var isRotated by rememberSaveable { mutableStateOf(false) }
+    val rotationAngle by animateFloatAsState(
+        targetValue = if (isRotated) 360F else 0f,
+        animationSpec = tween(durationMillis = 2500)
+    )
+    Column(
+        modifier = Modifier
+            .padding(10.dp)
+            .fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Image(
+            painter = painterResource(R.drawable.fan),
+            contentDescription = "fan",
+            modifier = Modifier
+                .rotate(rotationAngle)
+                .size(150.dp)
+        )
+
+        Button(
+            onClick = { isRotated = !isRotated },
+            modifier = Modifier
+                .padding(top = 50.dp)
+                .width(200.dp)
+        ) {
+            Text(text = "Rotate Fan")
+        }
+    }
+}
+
+
+@Preview
+@ExperimentalAnimationApi
+@Composable
+private fun AnimatedVisibilityEnterAndExit() {
+    var isVisible by rememberSaveable { mutableStateOf(false) }
+    Column {
+        AnimatedVisibility(
+            visible = isVisible,
+            enter = expandIn(animationSpec = tween(2000)),
+            exit = shrinkVertically(
+                animationSpec = tween(
+                    durationMillis = 1000,
+                )
+            )
+        ) {
+            CircleImage(300.dp)
+        }
+        Button(
+            onClick = { isVisible = !isVisible },
+            modifier = Modifier
+                .padding(top = 50.dp)
+                .width(300.dp)
+        ) {
+            if (isVisible) {
+                Text(text = "AnimatedVisibility \n(Press for Exit Animation)")
+            } else {
+                Text(text = "AnimatedVisibility \n(Press for Enter Animation)")
+
+            }
+        }
+
+    }
+}
+
+
+@Preview
+@Composable
+private fun CrossFadeAnimation() {
+    var currentPage by remember { mutableStateOf("A") }
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Crossfade(targetState = currentPage, animationSpec = tween(3000)) { screen ->
+            when (screen) {
+                "A" -> Text(
+                    "Page A", modifier = Modifier
+                        .fillMaxWidth()
+                        .fillMaxHeight(0.85f)
+                        .background(Color.Red)
+                )
+                "B" -> Text(
+                    "Page B", modifier = Modifier
+                        .fillMaxWidth()
+                        .fillMaxHeight(0.85f)
+                        .background(Color.Green)
+                )
+            }
+        }
+        Button(
+            onClick = {
+                if (currentPage.equals("A")) {
+                    currentPage = "B"
+                } else {
+                    currentPage = "A"
+
+                }
+            },
+            modifier = Modifier
+                .padding(top = 50.dp)
+                .width(300.dp)
+        ) {
+            Text(text = "Cross fade Animation")
+        }
+
+    }
+}
+
+
+@Composable
+fun CircleImage(imageHeight: Dp) {
+    Image(
+        painter = painterResource(R.drawable.andy_rubin),
+        contentDescription = "Circle Image",
+        contentScale = ContentScale.Crop,            // crop the image if it's not a square
+        modifier = Modifier
+            .size(imageHeight)
+            .clip(CircleShape)                       // clip to the circle shape
+            .border(3.dp, Color.Black, CircleShape)   // add a border (optional)
+    )
 }

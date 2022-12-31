@@ -1,43 +1,75 @@
 package com.pk4us.jetpackcomposetutorial
 
+import android.annotation.SuppressLint
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.*
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.tooling.preview.Preview
-import com.pk4us.jetpackcomposetutorial.ui.theme.JetpackComposeTutorialTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            JetpackComposeTutorialTheme {
-                // A surface container using the 'background' color from the theme
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colors.background
-                ) {
-                    Greeting("Android")
-                }
-            }
+
         }
     }
 }
 
+
+@Preview
 @Composable
-fun Greeting(name: String) {
-    Text(text = "Hello $name!")
+fun NoState() {
+    var clickCount = 0
+    Log.d("TAG", "NoState: create()")
+    Column {
+        Button(onClick = {
+            clickCount++
+            Log.d("TAG", "NoState: " + clickCount)
+        }) {
+            Text(text = "$clickCount times clicked")
+        }
+    }
 }
 
-@Preview(showBackground = true)
+
+@Preview
+//Not recommended. Use with remember()
+@SuppressLint("UnrememberedMutableState")
 @Composable
-fun DefaultPreview() {
-    JetpackComposeTutorialTheme {
-        Greeting("Android")
+fun MutableStateClick() {
+    var clickCount by mutableStateOf(0)
+    Column {
+        Button(onClick = { clickCount++ }) {
+            Text(text = "$clickCount times clicked")
+        }
+    }
+}
+
+
+@Preview
+@Composable
+fun RememberSample() {
+    var clickCount by rememberSaveable { mutableStateOf(0) }
+    Column {
+        Button(onClick = { clickCount++ }) {
+            Text(text = "$clickCount times clicked")
+        }
+    }
+}
+
+
+@Preview
+@Composable
+fun RememberSaveableClickCount() {
+    var clickCount by rememberSaveable { mutableStateOf(0) }
+    Column {
+        Button(onClick = { clickCount++ }) {
+            Text(text = "$clickCount times clicked")
+        }
     }
 }

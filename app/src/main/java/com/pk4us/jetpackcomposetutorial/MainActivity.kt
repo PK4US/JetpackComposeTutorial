@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
 class MainActivity : ComponentActivity() {
@@ -31,6 +32,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+@Preview
 @Composable
 fun PieChart1() {
     val sumOfValues = listOf(15f, 35f, 50f).sum() // Sum of all the values

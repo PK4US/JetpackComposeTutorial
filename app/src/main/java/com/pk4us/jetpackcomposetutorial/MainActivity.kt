@@ -5,10 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Slider
-import androidx.compose.material3.SliderDefaults
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -29,6 +26,9 @@ class MainActivity : ComponentActivity() {
                     SliderExample1()
                     SliderExample2()
                     SliderExample3()
+                    SliderExample4()
+                    SliderExample5()
+
                 }
             }
         }
@@ -82,7 +82,7 @@ fun SliderExample3() {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(text = sliderPosition.toString(),fontSize = sliderPosition.sp)
+        Text(text = sliderPosition.toString(), fontSize = sliderPosition.sp)
         Slider(
             modifier = Modifier.semantics { contentDescription = "Localized Description" },
             value = sliderPosition,
@@ -107,4 +107,41 @@ fun SliderExample3() {
             }
         )
     }
+}
+
+@Composable
+@ExperimentalMaterial3Api
+fun SliderExample4() {
+    var sliderPosition by remember { mutableStateOf(0f..100f) }
+    Text(text = sliderPosition.toString(), style = MaterialTheme.typography.labelLarge)
+    RangeSlider(
+        value = sliderPosition,
+        onValueChange = { sliderPosition = it },
+        valueRange = 0f..100f,
+        onValueChangeFinished = {
+            // launch some business logic update with the state you hold
+            // viewModel.updateSelectedSliderValue(sliderPosition)
+        },
+    )
+}
+
+@Composable
+@ExperimentalMaterial3Api
+fun SliderExample5() {
+    var sliderPosition by remember { mutableStateOf(0f..100f) }
+    Text(text = sliderPosition.toString(), style = MaterialTheme.typography.labelLarge)
+    RangeSlider(
+        steps = 5,
+        value = sliderPosition,
+        onValueChange = { sliderPosition = it },
+        valueRange = 0f..100f,
+        onValueChangeFinished = {
+            // launch some business logic update with the state you hold
+            // viewModel.updateSelectedSliderValue(sliderPosition)
+        },
+        colors = SliderDefaults.colors(
+            thumbColor = MaterialTheme.colorScheme.secondary,
+            activeTrackColor = MaterialTheme.colorScheme.secondary
+        )
+    )
 }

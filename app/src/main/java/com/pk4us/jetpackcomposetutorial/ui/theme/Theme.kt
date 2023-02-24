@@ -4,8 +4,10 @@ import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 private val DarkColorPalette = darkColorScheme(
     primary = Green80,
@@ -74,6 +76,19 @@ fun Material3AppTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Comp
         darkTheme -> DarkColorPalette
         else -> LightColorPalette
     }
+
+                    //__________________________________________________________________________________ скрывает элементы управления
+                val systemUiController = rememberSystemUiController()
+                SideEffect {
+                    // предназначены для настройки видимости панели навигации
+                    systemUiController.isNavigationBarVisible = false
+
+                    // предназначены для настройки видимости строки состояния соответственно
+                    systemUiController.isStatusBarVisible = false
+
+                    // isSystemBarsVisible для обеих системных панелей.
+                    //systemUiController.isSystemBarsVisible = false
+                }//__________________________________________________________________________________
 
     MaterialTheme(
         colorScheme = colors,
